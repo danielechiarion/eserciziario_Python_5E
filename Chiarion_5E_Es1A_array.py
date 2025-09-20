@@ -22,12 +22,15 @@ def displayMenu(options):
     while True:
         for i in range(len(options)):
             print((i+1), ") ", options[i], "\n")
-        choice = int(input(""))
+        try:   
+        	choice = int(input(""))
         
-        if choice < 1 or choice > len(options):
-            print("\nCodice non disponibile") # report the error
-        else:
-            return choice
+        	if choice < 1 or choice > len(options):
+            	print("\nCodice non disponibile") # report the error
+        	else:
+            	return choice
+        except ValueError:
+        	print("\nVALORE NON SUPPORTATO. Hai inserito una stringa")
 
 # *** START OF THE MAIN PROGRAM ***
 
@@ -50,20 +53,32 @@ options = (
 
 # ask for the size of the array checking the value
 while True:
-    sizeArray = int(input("Inserisci quanti numeri vuoi generare: "))
-    if sizeArray < MINSIZEARRAY:
-        print("Devi inserire almeno", MINSIZEARRAY, "numeri")
-    else:
-        break
+    try:
+    	sizeArray = int(input("Inserisci quanti numeri vuoi generare: "))
+    	if sizeArray < MINSIZEARRAY:
+     	   print("Devi inserire almeno", MINSIZEARRAY, "numeri")
+    	else:
+    	    break
+    except ValueError:
+        print("\nVALORE NON SUPPORTATO. Hai inserito una stringa")
 
 # ask for minimum and maximum numbers in the array checking them
-minArrayNumber = int(input("Inserisci il numero minimo dell'array: "))
 while True:
-    maxArrayNumber = int(input("Inserisci il numero massimo dell'array: "))
-    if maxArrayNumber <= minArrayNumber:
-        print("Il numero massimo deve essere strettamente maggiore")
-    else:
+    try:
+    	minArrayNumber = int(input("Inserisci il numero minimo dell'array: "))
         break
+    except ValueError:
+        print("\nVALORE NON SUPPORTATO. Hai inserito una stringa")
+        
+while True:
+    try:
+    	maxArrayNumber = int(input("Inserisci il numero massimo dell'array: "))
+    	if maxArrayNumber <= minArrayNumber:
+        	print("Il numero massimo deve essere strettamente maggiore")
+    	else:
+        	break
+    except ValueError:
+        print("\nVALORE NON SUPPORTATO. Hai inserito una stringa")
 
 # populate the array with the numbers and make the choice
 generateArray(array, sizeArray, minArrayNumber, maxArrayNumber)
