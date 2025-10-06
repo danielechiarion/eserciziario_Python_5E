@@ -11,7 +11,6 @@ window.title("Macchinetta caffè")
 window.resizable(True, True)
 window.configure(background="black")
 
-
 # define the class for beverages
 class Beverage:
     # constructor
@@ -62,6 +61,8 @@ def clrScr():
 
 # check the level of the water
 def checkWaterLevel():
+    global currentWaterLevel, MINIMUMWATER
+
     # if the variable is not set
     # I generate it randomly
     if currentWaterLevel < 0:
@@ -71,20 +72,32 @@ def checkWaterLevel():
 
 # function to check the used pods
 def checkUsedPods():
+    global usedPodsCounter, MINIMUMTANK
+
     if usedPodsCounter < 0:
         usedPodsCounter = random.randint(0, MINIMUMTANK+1)
     
     return usedPodsCounter != MINIMUMTANK
 
 # def function to check temperature heater
-def checkTemperatureHeater():
+def checkTemperatureHeater(message):
     DEGREESPERSECOND = 5 # define constant to increase the degrees
+    global currentTemperatureHeater, HEATERTEMPERATURE
 
     # if there's no temperature available I generate it
-    if currentTemperatureHeater < HEATERTEMPERATURE:
+    if currentTemperatureHeater < 0:
         currentTemperatureHeater = random.randint(0,HEATERTEMPERATURE+1)
 
-    # repeat the messag
+    # repeat the message until the heater reaches the level
+    message.config(text=f"Temperatura attuale: {currentTemperatureHeater}°C")
+    if currentTemperatureHeater < HEATERTEMPERATURE:
+        currentTemperatureHeater += DEGREESPERSECOND
+        window.after(1000, lambda: checkTemperatureHeater(message)) # repeat the message with heater temperature
 
 # *** START OF MAIN PROGRAM ***
+# define the message for temperature heater
+# and check the temperature
+messageTemperature = tk.Label(text="")
+messageTemperature.pack(pady=20)
+checkTemperatureHeater(messageTemperature)
 window.mainloop()
