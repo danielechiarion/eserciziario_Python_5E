@@ -4,13 +4,6 @@ import time
 
 import tkinter as tk
 
-# define tkinter environment
-window = tk.Tk()
-window.geometry("600x600")
-window.title("Macchinetta caffè")
-window.resizable(True, True)
-window.configure(background="black")
-
 # define the class for beverages
 class Beverage:
     # constructor
@@ -89,10 +82,59 @@ def checkTemperatureHeater(message):
         currentTemperatureHeater = random.randint(0,HEATERTEMPERATURE+1)
 
     # repeat the message until the heater reaches the level
-    message.config(text=f"Temperatura attuale: {currentTemperatureHeater}°C")
     if currentTemperatureHeater < HEATERTEMPERATURE:
         currentTemperatureHeater += DEGREESPERSECOND
         window.after(1000, lambda: checkTemperatureHeater(message)) # repeat the message with heater temperature
+        message.config(text=f"Temperatura attuale: {currentTemperatureHeater}°C")
+    else:
+        message.config(text="Tempeatura raggiunta")
+
+# *** FUNCTIONS WITH ELEMENTS OF Tkinter ***
+# define tkinter environment
+window = tk.Tk()
+window.geometry("600x600")
+window.title("Macchinetta caffè")
+window.resizable(True, True)
+window.configure(background="white")
+
+def createButton(master, string, value):
+    btn = tk.Button(master, text=string,
+                bg="lightgray",
+                fg="black",
+                activebackground="gray",
+                activeforeground="white",
+                relief="raised",
+                bd=3,
+                width=2,
+                height=1,
+                font=("Arial",20)
+        )
+
+    return btn
+
+def createRowButtons(master, numberButtons, rows, columns):
+    # variable declaration
+    buttonGrid = []
+    index = 0 
+
+    # create a cicle to create the buttons
+    for currentRow in range(rows):
+        row = []
+
+        for currentColumn in range(columns):
+            if index >= numberButtons:
+                return buttonGrid
+
+            
+            currentButton = createButton(master, str(index+1), index)
+            currentButton.grid(row=currentRow, column=currentColumn, padx=10, pady=10)
+            row.append(currentButton)
+
+            index += 1
+
+        buttonGrid.append(row)
+
+    return buttonGrid
 
 # *** START OF MAIN PROGRAM ***
 # define the message for temperature heater
@@ -100,4 +142,10 @@ def checkTemperatureHeater(message):
 messageTemperature = tk.Label(text="")
 messageTemperature.pack(pady=20)
 checkTemperatureHeater(messageTemperature)
+
+# create a frame for the buttons
+buttonFrame = tk.Frame(window, bg="white")
+buttonFrame.pack(pady=20)
+createRowButtons(buttonFrame, 9,3,3)
+
 window.mainloop()
