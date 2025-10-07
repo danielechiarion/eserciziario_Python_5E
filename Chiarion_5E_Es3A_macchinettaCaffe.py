@@ -73,7 +73,7 @@ def checkUsedPods():
     return usedPodsCounter != MINIMUMTANK
 
 # def function to check temperature heater
-def checkTemperatureHeater(message):
+def checkTemperatureHeater(canva, textID):
     DEGREESPERSECOND = 5 # define constant to increase the degrees
     global currentTemperatureHeater, HEATERTEMPERATURE
 
@@ -84,10 +84,10 @@ def checkTemperatureHeater(message):
     # repeat the message until the heater reaches the level
     if currentTemperatureHeater < HEATERTEMPERATURE:
         currentTemperatureHeater += DEGREESPERSECOND
-        window.after(1000, lambda: checkTemperatureHeater(message)) # repeat the message with heater temperature
-        message.config(text=f"Temperatura attuale: {currentTemperatureHeater}°C")
+        window.after(1000, lambda: checkTemperatureHeater(canva, textID)) # repeat the message with heater temperature
+        canva.itemconfig(textID, text=f"Temperatura attuale: {currentTemperatureHeater}°C")
     else:
-        message.config(text="Tempeatura raggiunta")
+        canva.itemconfig(textID, text="Temperatura raggiunta")
 
 # *** FUNCTIONS WITH ELEMENTS OF Tkinter ***
 # define tkinter environment
@@ -136,16 +136,31 @@ def createRowButtons(master, numberButtons, rows, columns):
 
     return buttonGrid
 
+def createDisplay():
+    global window
+    frame_display = tk.Frame(window)
+    frame_display.pack(pady=20)
+
+    canva = tk.Canvas(frame_display, bg="blue", width=300, height=80, highlightthickness=0)
+    canva.grid(row=0, column=0, columnspan=3, rowspan=2)
+
+    textId = canva.create_text(150,40,text="", font=("Terminal", 16), fill="white")
+
+    return canva, textId
+
 # *** START OF MAIN PROGRAM ***
-# define the message for temperature heater
-# and check the temperature
-messageTemperature = tk.Label(text="")
-messageTemperature.pack(pady=20)
-checkTemperatureHeater(messageTemperature)
+# insert the display of the machine
+display, textID = createDisplay()
 
 # create a frame for the buttons
 buttonFrame = tk.Frame(window, bg="white")
 buttonFrame.pack(pady=20)
 createRowButtons(buttonFrame, 9,3,3)
+
+# define the message for temperature heater
+# and check the temperature
+messageTemperature = tk.Label(text="")
+messageTemperature.pack(pady=20)
+checkTemperatureHeater(display,textID)
 
 window.mainloop()
