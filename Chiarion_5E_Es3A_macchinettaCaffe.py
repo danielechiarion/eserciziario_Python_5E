@@ -1,4 +1,4 @@
-import random
+import random, math
 import os
 import time
 
@@ -89,6 +89,8 @@ def checkTemperatureHeater(canva, textID):
     else:
         canva.itemconfig(textID, text="Temperatura raggiunta")
 
+    window.after(100, enableButtons)
+
 # *** FUNCTIONS WITH ELEMENTS OF Tkinter ***
 # define tkinter environment
 window = tk.Tk()
@@ -107,7 +109,9 @@ def createButton(master, string, value):
                 bd=3,
                 width=2,
                 height=1,
-                font=("Arial",20)
+                font=("Arial",20),
+                command=lambda: pressNumber(value+1),
+                state="disabled"
         )
 
     return btn
@@ -137,30 +141,132 @@ def createRowButtons(master, numberButtons, rows, columns):
     return buttonGrid
 
 def createDisplay():
-    global window
-    frame_display = tk.Frame(window)
+    global rightFrame
+    frame_display = tk.Frame(rightFrame)
     frame_display.pack(pady=20)
 
     canva = tk.Canvas(frame_display, bg="blue", width=300, height=80, highlightthickness=0)
     canva.grid(row=0, column=0, columnspan=3, rowspan=2)
 
-    textId = canva.create_text(150,40,text="", font=("Terminal", 16), fill="white")
+    textId = canva.create_text(150,40,text="", font=("Terminal", 16, "bold"), fill="white")
 
     return canva, textId
 
+def createBeverageLabel(master, number, name):
+    # canvas of the label
+    canvas = tk.Canvas(master, bg="black", width=200, height=50, highlightthickness=0)
+
+    # circle with number
+    circle_d = 24
+    circle_x = 10
+    circle_y = 13
+    canvas.create_oval(circle_x, circle_y, circle_x + circle_d, circle_y + circle_d,
+                       fill="white", outline="orange", width=2)
+
+    # centre the number
+    canvas.create_text(circle_x + circle_d / 2, circle_y + circle_d / 2,
+                       text=str(number), font=("Courier", 12, "bold"))
+
+    # text of the beverage next to the number
+    canvas.create_text(circle_x + circle_d + 15, circle_y + circle_d / 2,
+                       text=name, anchor="w", font=("Courier", 14, "bold"), fill="white")
+
+    return canvas
+
+def createBeverageGrid(master, number):
+    # create variables and lists
+    beverageGrid = []
+    index = 0
+
+    for currentRow in range(math.ceil(number/2)):
+        row = []
+        for currentColumn in range(2):
+            if index >= number:
+                return beverageGrid
+            
+            currentLabel = createBeverageLabel(master, index+1, beverages[index].name)
+            currentLabel.grid(row=currentRow, column=currentColumn, padx=10, pady=10)
+            row.append(currentLabel)
+            index += 1
+
+        beverageGrid.append(row)
+
+def updateDisplay():
+    global changingValue, fixedMessage, display, textID
+
+    currentText = fixedMessage + changingValue
+    display.itemconfig(textID, text=currentText)
+
+def pressNumber(num):
+    global changingValue
+    changingValue += str(num) # add the value
+    updateDisplay() # update the display
+
+def pressEnter():
+    global changingValue
+    number = int(changingValue)
+
+    if number >= len(beverages):
+        return True
+    else:
+        return False
+    
+def enableButtons():
+    global buttonGrid, enterButton
+
+    for currentRow in buttonGrid: 
+        for currentButton in currentRow: 
+            currentButton.config(state="normal") # change the state of the button
+    enterButton.config(state="normal")
+
 # *** START OF MAIN PROGRAM ***
+# create mainFrame for all the things
+mainFrame = tk.Frame(window, bg="white")
+mainFrame.pack(padx=20, pady=20)
+
+# define the list of beverages to use
+beverageFrame = tk.Frame(mainFrame, bg="white")
+beverageFrame.pack(side="left", pady=20)
+createBeverageGrid(beverageFrame, len(beverages))
+
+# create frame for the right part of the machine, including display and numbers
+rightFrame = tk.Frame(mainFrame, bg="white")
+rightFrame.pack(side="right", pady=20, padx=60)
+
 # insert the display of the machine
 display, textID = createDisplay()
 
 # create a frame for the buttons
-buttonFrame = tk.Frame(window, bg="white")
+buttonFrame = tk.Frame(rightFrame, bg="white")
 buttonFrame.pack(pady=20)
-createRowButtons(buttonFrame, 9,3,3)
+buttonGrid = createRowButtons(buttonFrame, 9,3,3)
+# add enter button
+enterButton = tk.Button(buttonFrame, text="Invio",
+                bg="lightgray",
+                fg="black",
+                activebackground="gray",
+                activeforeground="white",
+                relief="raised",
+                bd=3,
+                width=6,
+                height=1,
+                font=("Arial",20),
+                command=pressEnter,
+                state = "disabled"
+        )
+enterButton.grid(pady=20, columnspan=3)
 
 # define the message for temperature heater
 # and check the temperature
 messageTemperature = tk.Label(text="")
 messageTemperature.pack(pady=20)
 checkTemperatureHeater(display,textID)
+
+# CHOOSING THE BEVERAGE FROM THE LIST
+changingValue = "" # use a global variable for the value to use
+
+# update the display
+fixedMessage = "Seleziona una bevanda: "
+display.itemconfig(textID, text=fixedMessage)
 
 window.mainloop()
