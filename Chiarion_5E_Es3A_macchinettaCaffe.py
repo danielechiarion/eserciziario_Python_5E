@@ -39,7 +39,7 @@ beverages = (
 # define the constants for the machine
 HEATERTEMPERATURE = 60 # expressed in °C
 MINIMUMWATER = 1000 # expressed in mL
-MINIMUMTANK = 10 # minimum quantity of pods in the tank
+MAXIMUMTANK = 10 # minimum quantity of pods in the tank
 WATERRELEASESPEED = 5 # mL of water released per second
 
 # define global variables
@@ -65,12 +65,12 @@ def checkWaterLevel():
 
 # function to check the used pods
 def checkUsedPods():
-    global usedPodsCounter, MINIMUMTANK
+    global usedPodsCounter, MAXIMUMTANK
 
     if usedPodsCounter < 0:
-        usedPodsCounter = random.randint(0, MINIMUMTANK+1)
+        usedPodsCounter = random.randint(0, MAXIMUMTANK+1)
     
-    return usedPodsCounter != MINIMUMTANK
+    return usedPodsCounter != MAXIMUMTANK
 
 # def function to check temperature heater
 def checkTemperatureHeater(canva, textID):
@@ -88,8 +88,8 @@ def checkTemperatureHeater(canva, textID):
         canva.itemconfig(textID, text=f"Temperatura attuale: {currentTemperatureHeater}°C")
     else:
         canva.itemconfig(textID, text="Temperatura raggiunta")
-
-    window.after(100, enableButtons)
+        window.after(1000, configureMenu)
+        window.after(100, enableButtons)
 
 # *** FUNCTIONS WITH ELEMENTS OF Tkinter ***
 # define tkinter environment
@@ -206,10 +206,7 @@ def pressEnter():
     global changingValue
     number = int(changingValue)
 
-    if number >= len(beverages):
-        return True
-    else:
-        return False
+    return 1 <= number <= len(beverages)
     
 def enableButtons():
     global buttonGrid, enterButton
@@ -218,6 +215,62 @@ def enableButtons():
         for currentButton in currentRow: 
             currentButton.config(state="normal") # change the state of the button
     enterButton.config(state="normal")
+
+def configureMenu():
+    global display, textID
+    global fixedMessage
+
+    fixedMessage = "Seleziona una bevanda: "
+    display.itemconfig(textID, text=fixedMessage)
+
+def checkResult(value):
+    global display, textID
+    global changingValue
+
+    # control if the value if enough to proceed
+    if not value:
+        changingValue = ""
+        display.itemconfig(textID, text="Valore non valido, riprova")
+        return
+    
+    indexBeverage = int(changingValue)-1
+    preparationTime = math.ceil(float(beverages[indexBeverage].waterAmount / WATERRELEASESPEED)) # calculate time
+    window.after(300, lambda: displayRemainingTime(preparationTime))
+    
+
+def displayRemainingTime(preparationTime):
+    global fixedMessage, changingValue
+
+    fixedMessage = "Tempo rimasto: "
+    updateDisplay()
+
+    if preparationTime > 0:
+        changingValue = f"{preparationTime}s"
+        updateDisplay()
+        window.after(1000, lambda: displayRemainingTime(preparationTime - 1))
+    else:
+        fixedMessage = "Bevanda pronta!"
+        changingValue = ""
+        updateDisplay()
+        window.after(1000, controlMachineCondition)
+        window.after(2000, configureMenu)
+
+def controlMachineCondition():
+    global fixedMessage, changingValue
+    global display, textID
+    changingValue = ""
+    status = True
+
+    if not checkWaterLevel():
+        fixedMessage = "Acqua non sufficiente"
+        window.after(100, updateDisplay)
+        return
+    if not checkUsedPods():
+        fixedMessage = "Serbatoio cialde usate pieno"
+        window.after(1000, updateDisplay)
+        return
+    
+    checkTemperatureHeater(display, textID)
 
 # *** START OF MAIN PROGRAM ***
 # create mainFrame for all the things
@@ -251,22 +304,18 @@ enterButton = tk.Button(buttonFrame, text="Invio",
                 width=6,
                 height=1,
                 font=("Arial",20),
-                command=pressEnter,
+                command= lambda: checkResult(pressEnter()),
                 state = "disabled"
         )
 enterButton.grid(pady=20, columnspan=3)
 
 # define the message for temperature heater
 # and check the temperature
-messageTemperature = tk.Label(text="")
-messageTemperature.pack(pady=20)
-checkTemperatureHeater(display,textID)
+# check also the other condition
+fixedMessage = "Avvio macchina..."
+window.after(300, controlMachineCondition())
 
 # CHOOSING THE BEVERAGE FROM THE LIST
 changingValue = "" # use a global variable for the value to use
-
-# update the display
-fixedMessage = "Seleziona una bevanda: "
-display.itemconfig(textID, text=fixedMessage)
 
 window.mainloop()
