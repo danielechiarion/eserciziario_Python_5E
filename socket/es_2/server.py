@@ -56,6 +56,7 @@ def main():
 
         connection.sendall("OK".encode()) # send acknowledgement to the client
         logging.info(f"{time.time()}\tDevice: {result[1]}\tTemperature: {result[2]}\tHumidity: {result[3]}") # write it into the log
+        print(f"{time.time()}\tDevice: {result[1]}\tTemperature: {result[2]}\tHumidity: {result[3]}\n")
 
         connection.close()
 
