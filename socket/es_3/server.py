@@ -8,16 +8,16 @@ def avviaServer(textbox):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
         server.bind((HOST, PORT))
         server.listen()
-        textbox.insert(tkinter.END, "Server in ascolto...")
+        textbox.insert(tkinter.END, "Server in ascolto...\n")
         textbox.see(tkinter.END)
 
         conn, addr = server.accept()
         with conn:
-            textbox.insert(tkinter.END,f"Connessione da {addr}")
+            textbox.insert(tkinter.END,f"Connessione da {addr}\n")
             textbox.see(tkinter.END)
             data = conn.recv(1024).decode()
 
-            textbox.insert(tkinter.END, f"Messaggio ricevuto dal cliente: {data}")
+            textbox.insert(tkinter.END, f"Messaggio ricevuto dal cliente: {data}\n")
             textbox.see(tkinter.END)
 
             risposta = "Messaggio ricevuto correttamente!"
