@@ -7,8 +7,7 @@ options = (
     "Light",
     "Noise",
     "Acceleration",
-    "Distance",
-    "Gas"
+    "Orienteering"
 )
 
 def getTemperature():
@@ -42,11 +41,32 @@ def getAcceleration():
     display.scroll(accelerometer.get_z())
     sleep(1000)
 
-def getDistance():
-    
+def getOrienteering():
+    display.scroll(compass.heading())
 
-# Code in a 'while True:' loop repeats forever
+# start the counter for the option
+counter = 0
+display.scroll(options[counter]) # display the option
 while True:
-    display.show(Image.HEART)
-    sleep(1000)
-    display.scroll('Hello')
+    # restart counter
+    if counter == len(options):
+        counter = 0
+
+    # select option by the button pressed
+    if button_a.was_pressed():
+        counter += 1
+        display.scroll(options[counter]) # display the option
+        continue
+    elif button_b.was_pressed():
+        display.clear()
+        # if button B is pressed do the action
+        if options[counter] == "Temperature":
+            getTemperature()
+        elif options[counter] == "Light":
+            getLight()
+        elif options[counter] == "Noise":
+            getNoise()
+        elif options[counter] == "Acceleration":
+            getAcceleration()
+        else:
+            getOrienteering()
