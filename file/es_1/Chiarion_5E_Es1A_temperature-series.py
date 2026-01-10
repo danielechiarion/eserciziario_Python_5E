@@ -37,7 +37,7 @@ def main():
                 "timestamp": int(time.time())
             }
 
-            file.write(json.dumps(data)+"\n") # append data to file
+            file.write(json.dumps(data, indent=4)+"\n") # append data to file
             file.flush()
 
             time.sleep(MEASUREFREQUENCY) # wait for next time to measure
