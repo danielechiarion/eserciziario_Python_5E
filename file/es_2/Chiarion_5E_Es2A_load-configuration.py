@@ -1,0 +1,66 @@
+import random
+import json
+import time
+
+import misurazione
+
+# define constants for the execution of the file
+MINTEMPERATURE = -20.0
+MAXTEMPEATURE = 60.0
+MEASUREFREQUENCY = 3 # seconds
+
+# productor constants
+PRODUCER = "ildenielcorporation"
+DEVICE = "DHT11"
+MODEL = "Premium"
+
+
+def get_temperature():
+    """Function to get the temperature from the device.
+    In this case we will use a random generated number"""
+
+    global MINTEMPERATURE, MAXTEMPEATURE # importing global variables
+    
+    return round(random.uniform(MINTEMPERATURE, MAXTEMPEATURE), 1)
+
+def main():
+    """Main function to execute the temperature series"""
+    global PRODUCER, DEVICE, MODEL, MEASUREFREQUENCY
+
+    #try to read the parameters in the configuration file
+    try:
+        configFile = open("device.conf", "r")
+        configuration = json.load(configFile)
+        MEASUREFREQUENCY = configuration['measure_frequency']
+        DECIMALNUMBERS = configuration['decimals']
+        MEASURENUMBERS = configuration['measure_number']
+
+        if MEASURENUMBERS<1:
+            raise Exception("Sei speciale, metti un numero più grande di 0....\n")
+    except Exception as e:
+        print(e)
+        return 104    
+
+    file = open("data.dbt", "w")
+    
+    try:
+        for in range(MEASURENUMBERS):
+            data = {
+                "producer" : PRODUCER,
+                "device" : DEVICE,
+                "model": MODEL,
+                "temperature": misurazione.on_temperatura(DECIMALNUMBERS),
+                "humidity": misurazione.on_umidita(DECIMALNUMBERS),
+                "timestamp": int(time.time())
+            }
+
+            file.write(json.dumps(data, indent=4)+"\n") # append data to file
+            file.flush()
+
+            time.sleep(MEASUREFREQUENCY) # wait for next time to measure
+    except KeyboardInterrupt:
+        print("Measurement interrupted by user")
+        file.close()
+
+if __name__ == "__main__":
+    main()
