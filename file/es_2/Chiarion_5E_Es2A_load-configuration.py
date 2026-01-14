@@ -44,7 +44,7 @@ def main():
     file = open("data.dbt", "w")
     
     try:
-        for in range(MEASURENUMBERS):
+        for i in range(MEASURENUMBERS):
             data = {
                 "producer" : PRODUCER,
                 "device" : DEVICE,

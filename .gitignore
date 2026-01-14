@@ -3,3 +3,6 @@
 # remove data files on file folder
 file/**/*.json
 file/**/*.dbt
+
+# remove __pycache__ files and folders
+**/__pycache__/
